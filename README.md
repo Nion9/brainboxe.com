@@ -113,9 +113,6 @@ We believe great AI products are:
 
 [![Website](https://img.shields.io/badge/brainboxe.com-Visit_Us-00ffcc?style=flat-square&logo=google-chrome&logoColor=white&labelColor=0d0d0d)](https://brainboxe.com)
 &nbsp;
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Follow-0077B5?style=flat-square&logo=linkedin&logoColor=white&labelColor=0d0d0d)](https://linkedin.com/company/brainboxe)
-&nbsp;
-[![Email](https://img.shields.io/badge/Email-hello@brainboxe.com-ff6b35?style=flat-square&logo=gmail&logoColor=white&labelColor=0d0d0d)](mailto:hello@brainboxe.com)
 
 </div>
 
