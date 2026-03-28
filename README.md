@@ -14,7 +14,7 @@
 [![Website](https://img.shields.io/badge/🌐_Website-brainboxe.com-0ff?style=for-the-badge&labelColor=0a0a0a)](https://brainboxe.com)
 [![Status](https://img.shields.io/badge/Status-Building_in_Public-00ff88?style=for-the-badge&labelColor=0a0a0a)]()
 [![Products](https://img.shields.io/badge/Products-2_in_Dev-ff6b35?style=for-the-badge&labelColor=0a0a0a)]()
-[![Founded](https://img.shields.io/badge/Founded-2024-cyan?style=for-the-badge&labelColor=0a0a0a)]()
+[![Founded](https://img.shields.io/badge/Founded-2026-cyan?style=for-the-badge&labelColor=0a0a0a)]()
 
 </div>
 
@@ -44,7 +44,7 @@ Stop reading contracts manually. DocuPulse uses AI to analyze, extract, and surf
 - 📋 Smart document summarization
 - 💬 Ask questions about any document
 
-**Status:** `🟡 In Development`
+**Status:** `🔨 In Development`
 
 </td>
 <td width="50%">
@@ -59,7 +59,7 @@ A modular business operations suite built for teams who are tired of stitching t
 - 🔗 Seamless integrations
 - 🚀 Ship faster with less friction
 
-**Status:** `🟡 In Development`
+**Status:** `🔨 In Development`
 
 </td>
 </tr>
@@ -82,15 +82,13 @@ Deployment    →   Vercel · Cloudflare Pages
 ## 🗺️ Roadmap
 
 ```
-2024  ████████████████████  ✅  BrainBoxe founded
-      ████████████████████  ✅  DocuPulse v0.1 (prototype)
-      ████████████████████  ✅  Buildra architecture defined
+2026  ████████████████████  ✅  BrainBoxe founded
+      ██████████░░░░░░░░░░  🔨  DocuPulse — in active development
+      ██████████░░░░░░░░░░  🔨  Buildra — in active development
+      ░░░░░░░░░░░░░░░░░░░░  🎯  Public beta launch
 
-2025  ██████████░░░░░░░░░░  🔨  DocuPulse public beta
-      ██████░░░░░░░░░░░░░░  🔨  Buildra QuoteSnap module launch
-      ░░░░░░░░░░░░░░░░░░░░  🎯  BrainBoxe platform v1.0
-
-2026  ░░░░░░░░░░░░░░░░░░░░  🎯  Enterprise tier launch
+2027  ░░░░░░░░░░░░░░░░░░░░  🎯  BrainBoxe platform v1.0
+      ░░░░░░░░░░░░░░░░░░░░  🎯  Enterprise tier launch
       ░░░░░░░░░░░░░░░░░░░░  🎯  Multi-product expansion
 ```
 
@@ -125,7 +123,7 @@ We believe great AI products are:
 
 <div align="center">
 
-**Built with 🧠 by [BrainBoxe](https://brainboxe.com) · Canberra, Australia**
+**Built with 🧠 by [BrainBoxe](https://brainboxe.com) · Canberra, Australia · Est. 2026**
 
 *Automating the work. Amplifying the people.*
 
