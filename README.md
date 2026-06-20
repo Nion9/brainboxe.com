@@ -99,7 +99,7 @@ The site is a static file — drop `index.html` onto any static host. We use **C
 
 **Built by [Nion](https://github.com/Nion9)** — solo founder, BrainBoxe
 
-[![Website](https://img.shields.io/badge/brainboxe.com-C5F82A?style=for-the-badge&labelColor=0A0C08&logo=safari&logoColor=0A0C08)](https://brainboxe.com)
+[![Website](https://img.shields.io/badge/brainboxe.com-C5F82A?style=for-the-badge&labelColor=0A0C08&logo=safari&logoColor=0A0C08)](https://www.brainboxe.com)
 [![Email](https://img.shields.io/badge/Email-0A0C08?style=for-the-badge&logo=gmail&logoColor=C5F82A)](mailto:minhajulislamnion@gmail.com)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A0C08?style=for-the-badge&logo=linkedin&logoColor=C5F82A)](https://linkedin.com/in/Nion007)
 [![GitHub](https://img.shields.io/badge/GitHub-0A0C08?style=for-the-badge&logo=github&logoColor=C5F82A)](https://github.com/Nion9)
