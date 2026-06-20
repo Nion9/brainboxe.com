@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainBoxe — AI delivered as product, not project</title>
+<meta name="description" content="BrainBoxe ships focused AI modules — packaged software you deploy, not models you babysit.">
+<meta name="theme-color" content="#0A0C08">
+
+<meta property="og:title" content="BrainBoxe — AI delivered as product, not project">
+<meta property="og:description" content="Focused AI modules. Packaged, deployable, built to ship.">
+<meta property="og:type" content="website">
+
+<!-- Favicon (the mark, inline) -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect x='2' y='2' width='36' height='36' rx='10' fill='none' stroke='%23C5F82A' stroke-width='3'/%3E%3Ccircle cx='20' cy='20' r='5' fill='%23C5F82A'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Supabase client (only used when you configure keys below) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+/* ============================================================
+   BRAINBOXE — single-file landing page + admin
+   Theme: sharp lime on near-black, green-tinted glass
+   ------------------------------------------------------------
+   Backend = Supabase. See the SETUP block in the <script> at
+   the very bottom. Until you add keys it runs in DEMO MODE
+   (saves to your browser only).
+   ============================================================ */
+
+:root {
+  --base-1: #0A0C08;   /* near-black, faint green */
+  --base-2: #11140C;   /* charcoal green-black */
+
+  --glass-bg: rgba(220, 255, 180, 0.04);
+  --glass-bg-strong: rgba(220, 255, 180, 0.08);
+  --glass-border: rgba(230, 255, 200, 0.18);
+  --glass-border-bright: rgba(197, 248, 42, 0.55);
+
+  --text: #F4F7EC;                         /* off-white */
+  --text-mute: rgba(244, 247, 236, 0.74);
+  --text-faint: rgba(244, 247, 236, 0.52);
+
+  --lime: #C5F82A;
+  --lime-bright: #D9FF63;
+  --lime-deep: #8FB800;
+
+  --display: 'Space Grotesk', system-ui, sans-serif;
+  --body: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --pad-x: clamp(1.25rem, 4vw, 3rem);
+  --max-w: 1200px;
+  --radius: 20px;
+  --radius-sm: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--body);
+  color: var(--text);
+  background: var(--base-1);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+::selection { background: var(--lime); color: var(--base-1); }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ---- Animated backdrop ---- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(143,184,0,0.30), transparent 42%),
+    radial-gradient(circle at 86% 12%, rgba(60,90,20,0.40), transparent 44%),
+    radial-gradient(circle at 78% 84%, rgba(40,55,15,0.55), transparent 52%),
+    radial-gradient(circle at 20% 88%, rgba(100,140,10,0.18), transparent 46%),
+    linear-gradient(165deg, var(--base-1), var(--base-2));
+}
+.blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform;
+}
+.blob-1 { width: 460px; height: 460px; background: var(--lime-deep); opacity: 0.18; top: -130px; left: -90px; animation: drift1 22s ease-in-out infinite; }
+.blob-2 { width: 340px; height: 340px; background: #2E3D10; opacity: 0.5; top: 30%; right: -110px; animation: drift2 26s ease-in-out infinite; }
+.blob-3 { width: 520px; height: 520px; background: #1C2A08; opacity: 0.6; bottom: -170px; left: 34%; animation: drift3 30s ease-in-out infinite; }
+@keyframes drift1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(55px, 40px); } }
+@keyframes drift2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-50px, 55px); } }
+@keyframes drift3 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(40px, -50px); } }
+
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--pad-x); width: 100%; }
+
+/* ---- Glass primitive ---- */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* ---- Logo ---- */
+.logo { display: flex; align-items: center; gap: 0.6rem; }
+.logo svg { display: block; }
+.logo-word {
+  font-family: var(--display); font-weight: 600; font-size: 1.15rem;
+  letter-spacing: -0.015em; color: var(--text);
+}
+
+/* ---- Nav ---- */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  margin: 1rem auto 0; max-width: var(--max-w);
+  width: calc(100% - 2 * var(--pad-x)); border-radius: var(--radius);
+}
+.nav-inner { display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.4rem; }
+.nav-actions { display: flex; align-items: center; gap: 0.5rem; }
+.nav-link {
+  font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-mute); padding: 0.4rem 0.6rem; transition: color 0.2s;
+}
+.nav-link:hover { color: var(--text); }
+.btn-admin {
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-mute); background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+  border-radius: 999px; padding: 0.45rem 0.9rem; transition: color 0.2s, border-color 0.2s;
+}
+.btn-admin:hover { color: var(--text); border-color: var(--glass-border-bright); }
+
+/* ---- Hero ---- */
+.hero { padding: clamp(4rem, 11vw, 8rem) 0 clamp(3rem, 7vw, 5rem); }
+.hero-eyebrow {
+  font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-mute); display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2rem;
+}
+.hero-eyebrow .dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--lime);
+  box-shadow: 0 0 12px var(--lime); animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+.hero h1 {
+  font-family: var(--display); font-weight: 500; font-size: clamp(2.6rem, 7.5vw, 5.6rem);
+  line-height: 0.98; letter-spacing: -0.035em; max-width: 16ch; margin-bottom: 1.75rem;
+}
+.hero h1 .grad {
+  background: linear-gradient(105deg, var(--lime-bright), var(--lime-deep) 90%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero p {
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--text-mute);
+  max-width: 52ch; margin-bottom: 2.5rem;
+}
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  padding: 0.95rem 1.7rem; border-radius: 999px;
+  background: linear-gradient(135deg, var(--lime-bright), var(--lime-deep));
+  color: var(--base-1); font-family: var(--display); font-weight: 600; font-size: 0.95rem;
+  box-shadow: 0 8px 28px rgba(197,248,42,0.28); transition: transform 0.18s, box-shadow 0.2s;
+}
+.hero-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(197,248,42,0.42); }
+.hero-cta:active { transform: translateY(0); }
+.hero-cta .arr { transition: transform 0.2s; }
+.hero-cta:hover .arr { transform: translateX(3px); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; align-items: center; }
+.hero-cta.ghost {
+  background: transparent; color: var(--text); border: 1px solid var(--glass-border);
+  box-shadow: none;
+}
+.hero-cta.ghost:hover { border-color: var(--glass-border-bright); color: var(--lime-bright); transform: translateY(-2px); box-shadow: none; }
+
+/* ---- Section head ---- */
+.section-head { display: flex; justify-content: space-between; align-items: end; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 3rem; }
+.section-head h2 { font-family: var(--display); font-weight: 500; font-size: clamp(1.7rem, 3vw, 2.4rem); letter-spacing: -0.025em; }
+.section-head .count { font-family: var(--mono); font-size: 0.78rem; color: var(--text-faint); }
+
+/* ---- Products ---- */
+.products { padding: clamp(3rem, 6vw, 5rem) 0 clamp(3rem, 6vw, 5rem); }
+.product-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+@media (min-width: 760px) { .product-grid { grid-template-columns: 1fr 1fr; gap: 1.75rem; } }
+
+.product-card {
+  border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column;
+  transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s; position: relative;
+}
+.product-card:hover {
+  transform: translateY(-3px); border-color: var(--glass-border-bright);
+  box-shadow: 0 16px 44px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.09);
+}
+.product-img {
+  width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--glass-border); display: block;
+}
+.product-body { padding: 1.6rem 1.7rem 1.8rem; display: flex; flex-direction: column; flex: 1; }
+.product-top { display: flex; justify-content: flex-start; align-items: center; margin-bottom: 1rem; }
+.status-badge {
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.05em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.65rem; border-radius: 999px;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-mute);
+}
+.status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint); }
+.status-badge[data-status="Live"]::before { background: var(--lime); box-shadow: 0 0 8px var(--lime); }
+.status-badge[data-status="Live"] { color: var(--lime-bright); border-color: var(--glass-border-bright); }
+.status-badge[data-status="In build"]::before { background: #FFC65C; }
+.status-badge[data-status="In build"] { color: #FFD98A; }
+.status-badge[data-status="Preview"]::before { background: #7FB6FF; }
+.status-badge[data-status="Coming soon"]::before { background: var(--text-faint); }
+
+.product-name { font-family: var(--display); font-weight: 600; font-size: 1.65rem; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 0.6rem; }
+.product-tagline { color: var(--text-mute); font-size: 1rem; margin-bottom: 1.25rem; }
+.product-specs { list-style: none; display: grid; gap: 0.55rem; margin-bottom: 1.5rem; }
+.product-specs li { font-size: 0.9rem; color: var(--text-mute); padding-left: 1.2rem; position: relative; }
+.product-specs li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; border-radius: 50%; background: var(--lime); }
+.product-link {
+  margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--display); font-weight: 500; font-size: 0.9rem; padding: 0.7rem 1.2rem; border-radius: 999px;
+  background: rgba(197,248,42,0.13); border: 1px solid var(--glass-border-bright); color: var(--lime-bright);
+  transition: background 0.2s, transform 0.15s;
+}
+.product-link:hover { background: rgba(197,248,42,0.22); transform: translateX(2px); }
+
+.card-admin { position: absolute; top: 0.8rem; right: 0.8rem; display: none; gap: 0.4rem; z-index: 2; }
+body.is-admin .card-admin { display: flex; }
+.card-admin button {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 0.35rem 0.6rem; border-radius: 8px; border: 1px solid var(--glass-border);
+  background: rgba(10,12,8,0.8); backdrop-filter: blur(8px); color: var(--text);
+  transition: border-color 0.18s, color 0.18s;
+}
+.card-admin .edit:hover { border-color: var(--lime); color: var(--lime); }
+.card-admin .del:hover { border-color: #ff7a7a; color: #ff7a7a; }
+
+.empty-state { grid-column: 1 / -1; border-radius: var(--radius); padding: clamp(2.5rem, 6vw, 4rem); text-align: center; }
+.empty-state .icon { font-size: 2rem; margin-bottom: 1rem; opacity: 0.55; }
+.empty-state h3 { font-family: var(--display); font-weight: 500; font-size: 1.3rem; margin-bottom: 0.5rem; }
+.empty-state p { color: var(--text-mute); font-size: 0.95rem; }
+
+/* ---- Contact ---- */
+.contact { padding: clamp(3rem, 6vw, 5rem) 0 clamp(3rem, 7vw, 6rem); }
+.contact-lead { color: var(--text-mute); font-size: 1.1rem; max-width: 48ch; margin: -1.5rem 0 2.5rem; }
+.contact-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+@media (min-width: 680px) { .contact-grid { grid-template-columns: repeat(3, 1fr); } }
+.contact-card {
+  border-radius: var(--radius); padding: 1.8rem 1.7rem; display: flex; flex-direction: column; gap: 0.35rem;
+  transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
+}
+.contact-card:hover {
+  transform: translateY(-3px); border-color: var(--glass-border-bright);
+  box-shadow: 0 14px 38px rgba(0,0,0,0.45);
+}
+.contact-icon {
+  width: 42px; height: 42px; border-radius: 12px; margin-bottom: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(197,248,42,0.12); border: 1px solid var(--glass-border-bright); color: var(--lime-bright);
+  transition: background 0.22s;
+}
+.contact-card:hover .contact-icon { background: rgba(197,248,42,0.2); }
+.contact-icon svg { width: 20px; height: 20px; display: block; }
+.contact-name { font-family: var(--display); font-weight: 600; font-size: 1.15rem; letter-spacing: -0.015em; }
+.contact-sub {
+  font-family: var(--body); font-size: 0.9rem; color: var(--text-mute);
+  display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s;
+}
+.contact-card:hover .contact-sub { color: var(--text); }
+
+/* ---- Admin floating bar ---- */
+.admin-bar {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+  display: none; align-items: center; gap: 0.6rem; padding: 0.65rem 0.75rem; border-radius: 999px; z-index: 40;
+}
+body.is-admin .admin-bar { display: flex; }
+.admin-bar .tag {
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--lime); padding: 0 0.5rem; display: flex; align-items: center; gap: 0.4rem;
+}
+.admin-bar .tag::before { content:''; width:6px; height:6px; border-radius:50%; background: var(--lime); box-shadow: 0 0 8px var(--lime); }
+.admin-bar button {
+  font-family: var(--display); font-weight: 500; font-size: 0.82rem; padding: 0.55rem 1rem; border-radius: 999px;
+  border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--text);
+  transition: border-color 0.18s, transform 0.15s;
+}
+.admin-bar .add { background: linear-gradient(135deg, var(--lime-bright), var(--lime-deep)); color: var(--base-1); border: none; }
+.admin-bar .add:hover { transform: translateY(-1px); }
+.admin-bar button:hover { border-color: var(--glass-border-bright); }
+.demo-pill {
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--base-1); background: var(--lime); padding: 0.2rem 0.5rem; border-radius: 6px;
+}
+
+/* ---- Login modal ---- */
+.overlay {
+  position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center;
+  padding: 1.5rem; background: rgba(4,6,3,0.65); backdrop-filter: blur(6px);
+}
+.overlay.show { display: flex; }
+.modal { width: 100%; max-width: 380px; border-radius: var(--radius); padding: 2rem; }
+.modal h3 { font-family: var(--display); font-weight: 500; font-size: 1.4rem; margin-bottom: 0.4rem; }
+.modal p { color: var(--text-mute); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.modal .err { color: #ff9a9a; font-size: 0.85rem; margin-top: 0.6rem; min-height: 1.2em; }
+.field-email { display: none; }
+body.has-backend .field-email { display: block; }
+
+/* ---- Form fields ---- */
+.field { margin-bottom: 1.1rem; }
+.field label {
+  display: block; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-mute); margin-bottom: 0.5rem;
+}
+.field input, .field select, .field textarea {
+  width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm); padding: 0.75rem 0.9rem; color: var(--text);
+  font-family: var(--body); font-size: 0.95rem; transition: border-color 0.2s, background 0.2s;
+}
+.field textarea { resize: vertical; min-height: 80px; }
+.field input::placeholder, .field textarea::placeholder { color: var(--text-faint); }
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--glass-border-bright); background: rgba(255,255,255,0.08);
+}
+.field select option { background: var(--base-2); color: var(--text); }
+
+.btn-primary {
+  width: 100%; padding: 0.85rem; border-radius: var(--radius-sm); border: none;
+  background: linear-gradient(135deg, var(--lime-bright), var(--lime-deep)); color: var(--base-1);
+  font-family: var(--display); font-weight: 600; font-size: 0.95rem; transition: transform 0.15s, box-shadow 0.2s;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(197,248,42,0.3); }
+.btn-primary:disabled { opacity: 0.6; cursor: wait; transform: none; }
+
+/* ---- Slide-in editor panel ---- */
+.panel {
+  position: fixed; top: 0; right: 0; height: 100%; width: min(460px, 100%); z-index: 110;
+  transform: translateX(105%); transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  border-left: 1px solid var(--glass-border); display: flex; flex-direction: column;
+  background: rgba(17,20,12,0.82);
+  backdrop-filter: blur(24px) saturate(130%); -webkit-backdrop-filter: blur(24px) saturate(130%);
+}
+.panel.show { transform: translateX(0); }
+.panel-head { display: flex; justify-content: space-between; align-items: center; padding: 1.4rem 1.6rem; border-bottom: 1px solid var(--glass-border); flex-shrink: 0; }
+.panel-head h3 { font-family: var(--display); font-weight: 500; font-size: 1.25rem; }
+.panel-close {
+  background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: 8px;
+  width: 32px; height: 32px; color: var(--text); font-size: 1.1rem; line-height: 1;
+  transition: border-color 0.18s, color 0.18s;
+}
+.panel-close:hover { border-color: var(--glass-border-bright); color: var(--lime); }
+.panel-body { padding: 1.6rem; overflow-y: auto; flex: 1; }
+.panel-foot { padding: 1.2rem 1.6rem; border-top: 1px solid var(--glass-border); flex-shrink: 0; }
+
+.spec-row { display: flex; gap: 0.5rem; margin-bottom: 0.55rem; }
+.spec-row input { flex: 1; }
+.spec-row .remove {
+  flex-shrink: 0; width: 42px; border-radius: var(--radius-sm); border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.04); color: var(--text-mute); font-size: 1.1rem;
+  transition: border-color 0.18s, color 0.18s;
+}
+.spec-row .remove:hover { border-color: #ff7a7a; color: #ff7a7a; }
+.add-spec {
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--lime); background: none; border: 1px dashed var(--glass-border-bright);
+  border-radius: var(--radius-sm); padding: 0.5rem 0.8rem; width: 100%; transition: background 0.18s;
+}
+.add-spec:hover { background: rgba(197,248,42,0.1); }
+
+.img-preview {
+  margin-top: 0.6rem; width: 100%; aspect-ratio: 16/9; border-radius: var(--radius-sm);
+  border: 1px dashed var(--glass-border); object-fit: cover; display: none; background: rgba(255,255,255,0.03);
+}
+.img-preview.show { display: block; }
+
+/* ---- Toast ---- */
+.toast {
+  position: fixed; bottom: 5.5rem; left: 50%; transform: translateX(-50%) translateY(20px); z-index: 200;
+  padding: 0.8rem 1.3rem; border-radius: 999px; font-family: var(--mono); font-size: 0.8rem;
+  letter-spacing: 0.03em; color: var(--base-1); background: var(--lime);
+  opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s;
+  box-shadow: 0 8px 28px rgba(197,248,42,0.42); max-width: calc(100% - 2rem); text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.err { background: #ff7a7a; }
+
+/* ---- a11y / motion ---- */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--lime); outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto; }
+  .blob { animation: none; }
+}
+@media (max-width: 560px) {
+  .nav { margin-top: 0.6rem; }
+  .nav-link { display: none; }
+  .admin-bar { flex-wrap: wrap; justify-content: center; max-width: calc(100% - 2rem); }
+}
+}
+</style>
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true"></div>
+<div class="blob blob-1" aria-hidden="true"></div>
+<div class="blob blob-2" aria-hidden="true"></div>
+<div class="blob blob-3" aria-hidden="true"></div>
+
+<!-- NAV -->
+<header class="nav glass">
+  <div class="nav-inner">
+    <a href="#" class="logo" aria-label="BrainBoxe home">
+      <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true">
+        <defs>
+          <linearGradient id="navLime" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#D9FF63"/><stop offset="1" stop-color="#8FB800"/>
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="36" height="36" rx="10" fill="none" stroke="url(#navLime)" stroke-width="2.5"/>
+        <g stroke="url(#navLime)" stroke-width="1.6" opacity="0.85">
+          <line x1="20" y1="20" x2="11" y2="11"/><line x1="20" y1="20" x2="29" y2="11"/>
+          <line x1="20" y1="20" x2="11" y2="29"/><line x1="20" y1="20" x2="29" y2="29"/>
+        </g>
+        <g fill="url(#navLime)">
+          <circle cx="11" cy="11" r="2.4"/><circle cx="29" cy="11" r="2.4"/>
+          <circle cx="11" cy="29" r="2.4"/><circle cx="29" cy="29" r="2.4"/><circle cx="20" cy="20" r="4.6"/>
+        </g>
+      </svg>
+      <span class="logo-word">BrainBoxe</span>
+    </a>
+    <div class="nav-actions">
+      <a href="#products" class="nav-link">Products</a>
+      <a href="#contact" class="nav-link">Contact</a>
+      <button class="btn-admin" id="adminBtn">Admin</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-eyebrow"><span class="dot" aria-hidden="true"></span> BrainBoxe · AI Product Studio</div>
+      <h1>AI delivered <span class="grad">as product</span>, not project.</h1>
+      <p>BrainBoxe ships focused AI modules — packaged software you deploy, not models you babysit. Built for teams that need outcomes, not experiments.</p>
+      <div class="hero-actions">
+        <a href="#products" class="hero-cta">See the products <span class="arr" aria-hidden="true">→</span></a>
+        <a href="#contact" class="hero-cta ghost">Get in touch</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="products" id="products">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Products</h2>
+        </div>
+        <span class="count" id="productCount"></span>
+      </div>
+      <div class="product-grid" id="productGrid"><!-- rendered by JS --></div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Get in touch</h2>
+        </div>
+      </div>
+      <p class="contact-lead">Questions, partnerships, or early access — reach out anytime.</p>
+      <div class="contact-grid">
+        <a class="contact-card glass" href="mailto:minhajulislamnion@gmail.com">
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+          </span>
+          <span class="contact-name">Email</span>
+          <span class="contact-sub">minhajulislamnion@gmail.com</span>
+        </a>
+        <a class="contact-card glass" href="https://linkedin.com/in/Nion007" target="_blank" rel="noopener">
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+          </span>
+          <span class="contact-name">LinkedIn</span>
+          <span class="contact-sub">Connect with me →</span>
+        </a>
+        <a class="contact-card glass" href="https://github.com/Nion9" target="_blank" rel="noopener">
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2 0 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6 0-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8 0 3.2.9.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.5.4.9 1 .9 2.2v3.3c0 .3.1.7.8.6A12 12 0 0 0 12 .3z"/></svg>
+          </span>
+          <span class="contact-name">GitHub</span>
+          <span class="contact-sub">See the code →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ADMIN FLOATING BAR -->
+<div class="admin-bar glass">
+  <span class="tag">Admin</span>
+  <span class="demo-pill" id="demoPill" style="display:none;">Demo</span>
+  <button class="add" id="addBtn">+ Add product</button>
+  <button id="logoutBtn">Log out</button>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="overlay" id="loginOverlay">
+  <div class="modal glass">
+    <h3>Admin login</h3>
+    <p id="loginHint">Enter your password to manage products.</p>
+    <div class="field field-email" style="margin-bottom:0.8rem;">
+      <input type="email" id="emailInput" placeholder="Email" autocomplete="username">
+    </div>
+    <div class="field" style="margin-bottom:0.6rem;">
+      <input type="password" id="pwInput" placeholder="Password" autocomplete="current-password">
+    </div>
+    <div class="err" id="pwErr"></div>
+    <button class="btn-primary" id="loginSubmit" style="margin-top:0.6rem;">Log in</button>
+  </div>
+</div>
+
+<!-- EDITOR PANEL -->
+<aside class="panel" id="editorPanel" aria-hidden="true">
+  <div class="panel-head">
+    <h3 id="panelTitle">Add product</h3>
+    <button class="panel-close" id="panelClose" aria-label="Close">×</button>
+  </div>
+  <div class="panel-body">
+    <div class="field">
+      <label for="f-name">Name</label>
+      <input type="text" id="f-name" placeholder="e.g. DocuPulse">
+    </div>
+    <div class="field">
+      <label for="f-tagline">Tagline</label>
+      <textarea id="f-tagline" placeholder="One line on what it does."></textarea>
+    </div>
+    <div class="field">
+      <label for="f-status">Status</label>
+      <select id="f-status">
+        <option>Live</option><option>In build</option><option>Preview</option><option>Coming soon</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Specs (bullet points)</label>
+      <div id="specList"></div>
+      <button type="button" class="add-spec" id="addSpec">+ Add spec</button>
+    </div>
+    <div class="field">
+      <label for="f-image">Image URL</label>
+      <input type="url" id="f-image" placeholder="https://...">
+      <img class="img-preview" id="imgPreview" alt="">
+    </div>
+    <div class="field">
+      <label for="f-linkLabel">Button label</label>
+      <input type="text" id="f-linkLabel" placeholder="e.g. Open DocuPulse">
+    </div>
+    <div class="field">
+      <label for="f-linkUrl">Button link (live URL)</label>
+      <input type="url" id="f-linkUrl" placeholder="https://...">
+    </div>
+  </div>
+  <div class="panel-foot">
+    <button class="btn-primary" id="saveProduct">Save product</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   SETUP — REAL BACKEND (Supabase, free tier)
+   ------------------------------------------------------------
+   1. Create a project at https://supabase.com
+   2. In the SQL editor, run the SQL provided with this file
+      (creates the products table + security policies).
+   3. In Authentication → Users, add yourself as an admin user
+      (email + password). Turn OFF public sign-ups under
+      Authentication → Providers → Email so no one else can.
+   4. In Project Settings → API, copy your Project URL and the
+      "anon public" key and paste them below.
+   ------------------------------------------------------------
+   The anon key is SAFE to put here — it's meant to be public.
+   Data is protected by Row Level Security, and your admin
+   password is checked by Supabase's servers, never stored in
+   this file. Until you fill these in, the site runs in DEMO
+   MODE and saves to your browser only.
+   ============================================================ */
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+/* DEMO-mode password (only used when Supabase isn't configured).
+   This one IS visible in the source — fine for demo only. */
+const DEMO_PASSWORD = "changeme";
+
+/* ---- Backend detection ---- */
+const BACKEND_ON = SUPABASE_URL && SUPABASE_URL.indexOf("YOUR_") === -1
+  && SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.indexOf("YOUR_") === -1
+  && window.supabase;
+let sb = BACKEND_ON ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+const STORE_KEY = 'brainboxe_products_v1';
+let products = [];
+let editingId = null;
+
+/* ---- Row mapping (db snake_case <-> js camelCase) ---- */
+function fromRow(r) {
+  return {
+    id: r.id, name: r.name, tagline: r.tagline, status: r.status,
+    specs: Array.isArray(r.specs) ? r.specs : [],
+    image: r.image, linkLabel: r.link_label, linkUrl: r.link_url
+  };
+}
+function toRow(p) {
+  return {
+    name: p.name, tagline: p.tagline, status: p.status, specs: p.specs,
+    image: p.image, link_label: p.linkLabel, link_url: p.linkUrl
+  };
+}
+
+/* ---- Data layer (backend OR localStorage) ---- */
+async function loadProducts() {
+  if (BACKEND_ON) {
+    const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: true });
+    if (error) { console.error(error); showToast('Could not load products', true); return []; }
+    return data.map(fromRow);
+  }
+  try { const raw = localStorage.getItem(STORE_KEY); if (raw) return JSON.parse(raw); } catch (e) {}
+  return [];
+}
+async function createProduct(p) {
+  if (BACKEND_ON) {
+    const { data, error } = await sb.from('products').insert(toRow(p)).select().single();
+    if (error) throw error;
+    return fromRow(data);
+  }
+  p.id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  products.push(p); persistLocal(); return p;
+}
+async function updateProduct(id, p) {
+  if (BACKEND_ON) {
+    const { data, error } = await sb.from('products').update(toRow(p)).eq('id', id).select().single();
+    if (error) throw error;
+    return fromRow(data);
+  }
+  const idx = products.findIndex(x => x.id === id);
+  products[idx] = Object.assign({}, products[idx], p); persistLocal(); return products[idx];
+}
+async function removeProduct(id) {
+  if (BACKEND_ON) {
+    const { error } = await sb.from('products').delete().eq('id', id);
+    if (error) throw error;
+  } else {
+    products = products.filter(x => x.id !== id); persistLocal();
+  }
+}
+function persistLocal() { try { localStorage.setItem(STORE_KEY, JSON.stringify(products)); } catch (e) {} }
+
+/* ---- Render ---- */
+const grid = document.getElementById('productGrid');
+const countEl = document.getElementById('productCount');
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function render() {
+  grid.innerHTML = '';
+  countEl.textContent = products.length ? String(products.length).padStart(2,'0') + ' module' + (products.length>1?'s':'') : '';
+  if (!products.length) {
+    grid.innerHTML = `
+      <div class="empty-state glass">
+        <div class="icon" aria-hidden="true">◳</div>
+        <h3>No products yet</h3>
+        <p>New modules are on the way.</p>
+      </div>`;
+    return;
+  }
+  products.forEach((p, i) => {
+    const card = document.createElement('article');
+    card.className = 'product-card glass';
+    const specs = (p.specs || []).filter(Boolean).map(s => `<li>${esc(s)}</li>`).join('');
+    card.innerHTML = `
+      <div class="card-admin">
+        <button class="edit" data-id="${esc(p.id)}">Edit</button>
+        <button class="del" data-id="${esc(p.id)}">Delete</button>
+      </div>
+      ${p.image ? `<img class="product-img" src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+      <div class="product-body">
+        <div class="product-top">
+          <span class="status-badge" data-status="${esc(p.status)}">${esc(p.status)}</span>
+        </div>
+        <h3 class="product-name">${esc(p.name)}</h3>
+        ${p.tagline ? `<p class="product-tagline">${esc(p.tagline)}</p>` : ''}
+        ${specs ? `<ul class="product-specs">${specs}</ul>` : ''}
+        ${p.linkUrl ? `<a class="product-link" href="${esc(p.linkUrl)}" target="_blank" rel="noopener">${esc(p.linkLabel || 'Open')} <span aria-hidden="true">→</span></a>` : ''}
+      </div>`;
+    grid.appendChild(card);
+  });
+  grid.querySelectorAll('.card-admin .edit').forEach(b => b.addEventListener('click', () => openEditor(b.dataset.id)));
+  grid.querySelectorAll('.card-admin .del').forEach(b => b.addEventListener('click', () => deleteProductFlow(b.dataset.id)));
+}
+
+/* ---- Auth ---- */
+const body = document.body;
+const loginOverlay = document.getElementById('loginOverlay');
+const emailInput = document.getElementById('emailInput');
+const pwInput = document.getElementById('pwInput');
+const pwErr = document.getElementById('pwErr');
+const loginHint = document.getElementById('loginHint');
+
+function setAdmin(on) { body.classList.toggle('is-admin', on); }
+
+async function refreshAdminState() {
+  if (BACKEND_ON) {
+    const { data } = await sb.auth.getSession();
+    setAdmin(!!(data && data.session));
+  } else {
+    setAdmin(sessionStorage.getItem('bb_admin') === '1');
+  }
+}
+
+document.getElementById('adminBtn').addEventListener('click', () => {
+  if (body.classList.contains('is-admin')) { showToast('Already logged in'); return; }
+  loginOverlay.classList.add('show');
+  setTimeout(() => (BACKEND_ON ? emailInput : pwInput).focus(), 50);
+});
+document.getElementById('loginSubmit').addEventListener('click', doLogin);
+pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+emailInput.addEventListener('keydown', e => { if (e.key === 'Enter') pwInput.focus(); });
+loginOverlay.addEventListener('click', e => { if (e.target === loginOverlay) loginOverlay.classList.remove('show'); });
+
+async function doLogin() {
+  pwErr.textContent = '';
+  if (BACKEND_ON) {
+    const btn = document.getElementById('loginSubmit');
+    btn.disabled = true; btn.textContent = 'Logging in…';
+    const { error } = await sb.auth.signInWithPassword({ email: emailInput.value.trim(), password: pwInput.value });
+    btn.disabled = false; btn.textContent = 'Log in';
+    if (error) { pwErr.textContent = error.message || 'Login failed.'; pwInput.select(); return; }
+    setAdmin(true); finishLogin();
+  } else {
+    if (pwInput.value === DEMO_PASSWORD) {
+      sessionStorage.setItem('bb_admin', '1'); setAdmin(true); finishLogin();
+    } else { pwErr.textContent = 'Incorrect password.'; pwInput.select(); }
+  }
+}
+function finishLogin() {
+  loginOverlay.classList.remove('show');
+  pwInput.value = ''; emailInput.value = '';
+  showToast('Logged in as admin');
+}
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  if (BACKEND_ON) { await sb.auth.signOut(); } else { sessionStorage.removeItem('bb_admin'); }
+  setAdmin(false); closeEditor(); showToast('Logged out');
+});
+
+/* ---- Editor ---- */
+const panel = document.getElementById('editorPanel');
+const panelTitle = document.getElementById('panelTitle');
+const specList = document.getElementById('specList');
+const fields = {
+  name: document.getElementById('f-name'), tagline: document.getElementById('f-tagline'),
+  status: document.getElementById('f-status'), image: document.getElementById('f-image'),
+  linkLabel: document.getElementById('f-linkLabel'), linkUrl: document.getElementById('f-linkUrl'),
+};
+const imgPreview = document.getElementById('imgPreview');
+
+function addSpecRow(value = '') {
+  const row = document.createElement('div');
+  row.className = 'spec-row';
+  row.innerHTML = `<input type="text" placeholder="e.g. PDF input" value="${esc(value)}">
+    <button type="button" class="remove" aria-label="Remove spec">×</button>`;
+  row.querySelector('.remove').addEventListener('click', () => row.remove());
+  specList.appendChild(row);
+}
+document.getElementById('addSpec').addEventListener('click', () => addSpecRow());
+fields.image.addEventListener('input', () => {
+  const v = fields.image.value.trim();
+  if (v) { imgPreview.src = v; imgPreview.classList.add('show'); } else imgPreview.classList.remove('show');
+});
+imgPreview.addEventListener('error', () => imgPreview.classList.remove('show'));
+
+function openEditor(id) {
+  editingId = id || null;
+  panelTitle.textContent = id ? 'Edit product' : 'Add product';
+  specList.innerHTML = '';
+  imgPreview.classList.remove('show');
+  if (id) {
+    const p = products.find(x => x.id === id);
+    fields.name.value = p.name || ''; fields.tagline.value = p.tagline || '';
+    fields.status.value = p.status || 'Live'; fields.image.value = p.image || '';
+    fields.linkLabel.value = p.linkLabel || ''; fields.linkUrl.value = p.linkUrl || '';
+    (p.specs && p.specs.length ? p.specs : ['']).forEach(s => addSpecRow(s));
+    if (p.image) { imgPreview.src = p.image; imgPreview.classList.add('show'); }
+  } else {
+    fields.name.value = ''; fields.tagline.value = ''; fields.status.value = 'Live';
+    fields.image.value = ''; fields.linkLabel.value = ''; fields.linkUrl.value = '';
+    addSpecRow();
+  }
+  panel.classList.add('show');
+  panel.setAttribute('aria-hidden', 'false');
+  setTimeout(() => fields.name.focus(), 80);
+}
+function closeEditor() {
+  panel.classList.remove('show');
+  panel.setAttribute('aria-hidden', 'true');
+  editingId = null;
+}
+document.getElementById('panelClose').addEventListener('click', closeEditor);
+document.getElementById('addBtn').addEventListener('click', () => openEditor(null));
+
+document.getElementById('saveProduct').addEventListener('click', async () => {
+  const name = fields.name.value.trim();
+  if (!name) { fields.name.focus(); showToast('Name is required', true); return; }
+  const specs = Array.from(specList.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
+  const data = {
+    name, tagline: fields.tagline.value.trim(), status: fields.status.value, specs,
+    image: fields.image.value.trim(), linkLabel: fields.linkLabel.value.trim(), linkUrl: fields.linkUrl.value.trim(),
+  };
+  const saveBtn = document.getElementById('saveProduct');
+  saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+  try {
+    if (editingId) {
+      const updated = await updateProduct(editingId, data);
+      const idx = products.findIndex(x => x.id === editingId);
+      if (idx > -1) products[idx] = updated;
+      showToast('Product updated');
+    } else {
+      const created = await createProduct(data);
+      if (BACKEND_ON) products.push(created);
+      showToast('Product added');
+    }
+    render(); closeEditor();
+  } catch (err) {
+    console.error(err); showToast('Save failed: ' + (err.message || 'error'), true);
+  } finally {
+    saveBtn.disabled = false; saveBtn.textContent = 'Save product';
+  }
+});
+
+async function deleteProductFlow(id) {
+  const p = products.find(x => x.id === id);
+  if (!confirm('Delete "' + (p ? p.name : 'this product') + '"? This can\'t be undone.')) return;
+  try {
+    await removeProduct(id);
+    products = products.filter(x => x.id !== id);
+    render(); showToast('Product deleted');
+  } catch (err) { console.error(err); showToast('Delete failed', true); }
+}
+
+/* ---- Toast ---- */
+let toastTimer;
+const toastEl = document.getElementById('toast');
+function showToast(msg, isErr) {
+  toastEl.textContent = msg;
+  toastEl.classList.toggle('err', !!isErr);
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2800);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { loginOverlay.classList.remove('show'); closeEditor(); }
+});
+
+/* ---- Init ---- */
+(async function init() {
+  if (BACKEND_ON) {
+    body.classList.add('has-backend');
+    loginHint.textContent = 'Sign in with your admin email and password.';
+  } else {
+    document.getElementById('demoPill').style.display = '';
+  }
+  await refreshAdminState();
+  products = await loadProducts();
+  render();
+})();
+</script>
+</body>
+</html>
