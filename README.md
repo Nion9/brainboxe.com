@@ -12,7 +12,7 @@ Focused AI modules — packaged software you deploy, not models you babysit.
 [![Studio](https://img.shields.io/badge/AI_Product_Studio-2026-0A0C08?style=for-the-badge&labelColor=C5F82A)](https://brainboxe.com)
 [![Built with](https://img.shields.io/badge/built_with-HTML_·_Supabase_·_Cloudflare-0A0C08?style=for-the-badge)](https://brainboxe.com)
 
-**[→ Visit brainboxe.com](https://brainboxe.com)**
+**[→ Visit brainboxe.com](https://www.brainboxe.com)**
 
 </div>
 
